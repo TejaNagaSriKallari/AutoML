@@ -1,0 +1,52 @@
+# Production-style stack: Postgres + API + separate training workers + web.
+#   docker compose up --build
+#   docker compose up --scale worker=3   (more parallel training runs)
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: automl
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-automl}
+      POSTGRES_DB: automl
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U automl"]
+      interval: 5s
+      retries: 10
+
+  api:
+    build: ./backend
+    environment: &backend_env
+      DATABASE_URL: postgresql+psycopg://automl:${POSTGRES_PASSWORD:-automl}@db:5432/automl
+      SECRET_KEY: ${SECRET_KEY:?set SECRET_KEY}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      PUBLIC_API_URL: ${PUBLIC_API_URL:-http://localhost:8000}
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:3000}
+      RUN_WORKER_IN_API: "false"
+      DATA_DIR: /data
+      MODEL_CACHE_DIR: /data/cache
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+    volumes: [appdata:/data]
+    ports: ["8000:8000"]
+    depends_on:
+      db: { condition: service_healthy }
+
+  worker:
+    build: ./backend
+    command: ["python", "-m", "app.worker"]
+    environment: *backend_env
+    volumes: [appdata:/data]
+    depends_on:
+      db: { condition: service_healthy }
+
+  web:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: ${PUBLIC_API_URL:-http://localhost:8000}
+    ports: ["3000:3000"]
+    depends_on: [api]
+
+volumes:
+  pgdata:
+  appdata:

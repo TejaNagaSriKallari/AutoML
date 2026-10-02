@@ -1,0 +1,41 @@
+# --- API ---
+fastapi>=0.115
+uvicorn[standard]>=0.30
+python-multipart>=0.0.9
+pydantic[email]>=2.7
+pydantic-settings>=2.3
+sqlalchemy>=2.0
+psycopg[binary]>=3.2
+pyjwt>=2.8
+anthropic>=0.70
+
+# --- Data ---
+numpy>=1.26
+pandas>=2.2
+pyarrow>=16
+openpyxl>=3.1
+pillow>=10.3
+pyyaml>=6.0
+
+# --- Classical ML ---
+scikit-learn>=1.5
+xgboost>=2.1
+lightgbm>=4.5
+catboost>=1.2 ; python_version < "3.14"
+optuna>=4.0
+statsmodels>=0.14
+pebble>=5.0
+joblib>=1.4
+psutil>=5.9
+
+# --- Deep learning on CPU (Option 1: frozen pretrained embeddings) ---
+# Install the CPU build of torch first:
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+torch>=2.5
+torchvision>=0.20
+timm>=1.0
+sentence-transformers>=3.0
+
+# --- Tests ---
+pytest>=8.2
+httpx>=0.27

@@ -1,0 +1,49 @@
+# Render Blueprint: free API (lite mode) + free web frontend. See DEPLOY.md.
+services:
+  - type: web
+    name: automl-api
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements-lite.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT --proxy-headers
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.8"
+      - key: DATABASE_URL
+        sync: false # Neon connection string
+      - key: SECRET_KEY
+        generateValue: true
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: LITE_MODE
+        value: "true"
+      # 512 MB RAM: one training process, small tables, one run per user at a time.
+      - key: WORKER_PROCESSES
+        value: "1"
+      - key: MAX_TABULAR_ROWS
+        value: "10000"
+      - key: MAX_UPLOAD_MB
+        value: "50"
+      - key: MAX_ACTIVE_RUNS_PER_USER
+        value: "1"
+      - key: DEFAULT_TIME_LIMIT_PER_MODEL
+        value: "120"
+
+  - type: web
+    name: automl-studio-web
+    runtime: node
+    plan: free
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      # "/" = call the API on this same site; next.config.ts proxies /api/* to BACKEND_URL.
+      - key: NEXT_PUBLIC_API_URL
+        value: /
+      - key: BACKEND_URL
+        sync: false # https://automl-api.onrender.com (the API service's URL)

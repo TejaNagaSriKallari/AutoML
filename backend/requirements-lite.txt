@@ -1,0 +1,33 @@
+# Lite install for small free servers (Render free, 512 MB): everything except PyTorch.
+# Versions are pinned to the ones the test suite passed with.
+# Run with LITE_MODE=true: table tasks train on the server, text/image tasks train on Colab.
+
+# --- API ---
+fastapi==0.142.2
+uvicorn[standard]==0.54.0
+python-multipart==0.0.32
+pydantic[email]==2.13.5
+pydantic-settings==2.15.0
+sqlalchemy==2.1.2
+psycopg[binary]==3.3.6
+pyjwt==2.15.1
+anthropic==1.11.0
+
+# --- Data ---
+numpy==2.5.2
+pandas==3.0.6
+pyarrow==25.0.1
+openpyxl==3.1.5
+pillow==12.3.0
+pyyaml==6.0.3
+
+# --- Classical ML ---
+scikit-learn==1.9.1
+xgboost==3.4.1
+lightgbm==4.7.0
+catboost==1.2.10 ; python_version < "3.14"
+optuna==5.0.0
+statsmodels==0.15.0
+pebble==5.2.2
+joblib==1.6.0
+psutil==7.2.2
